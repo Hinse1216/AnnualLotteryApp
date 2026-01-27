@@ -1,0 +1,208 @@
+<Window x:Class="AnnualLotteryApp.Views.DrawWallWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="抽奖大屏" WindowState="Maximized" WindowStyle="None" Background="#020617" AllowsTransparency="False"
+        KeyDown="Window_KeyDown">
+    <Window.Resources>
+        <!-- 金粉飘落粒子样式 -->
+        <Style x:Key="GoldParticleStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="6" />
+            <Setter Property="Height" Value="6" />
+            <Setter Property="Fill" Value="#FACC15" />
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <!-- 背景图片 + 渐变叠加 -->
+        <Grid.Background>
+            <ImageBrush
+                ImageSource="/data/imgBgd.png"
+                Stretch="Fill"
+                AlignmentX="Center"
+                AlignmentY="Center" />
+        </Grid.Background>
+
+        <!-- 叠加一层暗色渐变提升对比度 -->
+        <Grid>
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#B3020617" Offset="0" />
+                    <GradientStop Color="#E0111827" Offset="0.6" />
+                    <GradientStop Color="#B3020617" Offset="1" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- 背景音乐 -->
+            <MediaElement x:Name="BgMusic" Source="data/sndBgd.mp3" LoadedBehavior="Play" UnloadedBehavior="Stop" Volume="0.6" IsHitTestVisible="False" Visibility="Collapsed" />
+
+            <!-- 金粉飘落层 -->
+            <Canvas x:Name="GoldDustCanvas" IsHitTestVisible="False">
+                <Canvas.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever">
+                                <!-- 简单示例：从右上角往左下飘落的金粉 -->
+                                <DoubleAnimation Storyboard.TargetName="Gold1" Storyboard.TargetProperty="(Canvas.Top)" From="-20" To="200" Duration="0:0:5" AutoReverse="False" RepeatBehavior="Forever" />
+                                <DoubleAnimation Storyboard.TargetName="Gold1" Storyboard.TargetProperty="(Canvas.Left)" From="400" To="200" Duration="0:0:5" AutoReverse="False" RepeatBehavior="Forever" />
+
+                                <DoubleAnimation Storyboard.TargetName="Gold2" Storyboard.TargetProperty="(Canvas.Top)" From="-40" To="260" Duration="0:0:7" AutoReverse="False" RepeatBehavior="Forever" />
+                                <DoubleAnimation Storyboard.TargetName="Gold2" Storyboard.TargetProperty="(Canvas.Left)" From="460" To="260" Duration="0:0:7" AutoReverse="False" RepeatBehavior="Forever" />
+
+                                <DoubleAnimation Storyboard.TargetName="Gold3" Storyboard.TargetProperty="(Canvas.Top)" From="-10" To="230" Duration="0:0:6" AutoReverse="False" RepeatBehavior="Forever" />
+                                <DoubleAnimation Storyboard.TargetName="Gold3" Storyboard.TargetProperty="(Canvas.Left)" From="430" To="230" Duration="0:0:6" AutoReverse="False" RepeatBehavior="Forever" />
+
+                                <DoubleAnimation Storyboard.TargetName="Gold1" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" AutoReverse="True" RepeatBehavior="Forever" />
+                                <DoubleAnimation Storyboard.TargetName="Gold2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1.2" AutoReverse="True" RepeatBehavior="Forever" />
+                                <DoubleAnimation Storyboard.TargetName="Gold3" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1.4" AutoReverse="True" RepeatBehavior="Forever" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Canvas.Triggers>
+
+                <!-- 右上角一簇金粉 -->
+                <Ellipse x:Name="Gold1" Style="{StaticResource GoldParticleStyle}" Canvas.Top="-20" Canvas.Left="400" />
+                <Ellipse x:Name="Gold2" Style="{StaticResource GoldParticleStyle}" Canvas.Top="-40" Canvas.Left="460" />
+                <Ellipse x:Name="Gold3" Style="{StaticResource GoldParticleStyle}" Canvas.Top="-10" Canvas.Left="430" />
+            </Canvas>
+
+            <!-- 原有主内容层 -->
+            <Grid Margin="40">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- 顶部标题与当前奖项 -->
+                <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,30">
+                    <TextBlock Text="{Binding TitleText}" Foreground="#E5E7EB" FontSize="46" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
+                        <TextBlock Text="当前奖项：" Foreground="#9CA3AF" FontSize="26" Margin="0,4,10,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding SelectedPrizeLevel}" Foreground="#FCD34D" FontSize="40" FontWeight="Bold" VerticalAlignment="Center" />
+                        <TextBlock Text="  (本轮人数：" Foreground="#E5E7EB" FontSize="26" Margin="10,4,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding CurrentPrizeDrawCount}" Foreground="#FCD34D" FontSize="32" FontWeight="Bold" Margin="0,0,2,0" VerticalAlignment="Center" />
+                        <TextBlock Text=")" Foreground="#E5E7EB" FontSize="26" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 中间抽奖区域：未开始显示待抽奖人员，开始时滚动，停止后显示中奖人员 -->
+                <Grid Grid.Row="1">
+                    <!-- 烟花背景层：仅在抽奖停止后显示 -->
+                    <Canvas x:Name="FireworkCanvas" IsHitTestVisible="False" Panel.ZIndex="0">
+                        <Canvas.Style>
+                            <Style TargetType="Canvas">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="Width" Value="800" />
+                                <Setter Property="Height" Value="400" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDrawing}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Canvas.Style>
+                        <Canvas.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!-- 三组简单烟花：从底部中心向外扩散并淡出 -->
+                                        <DoubleAnimation Storyboard.TargetName="Fw1" Storyboard.TargetProperty="Width" From="0" To="260" Duration="0:0:1.5" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw1" Storyboard.TargetProperty="Height" From="0" To="260" Duration="0:0:1.5" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw1" Storyboard.TargetProperty="Opacity" From="0.8" To="0" Duration="0:0:1.5" AutoReverse="False" RepeatBehavior="Forever" />
+
+                                        <DoubleAnimation Storyboard.TargetName="Fw2" Storyboard.TargetProperty="Width" From="0" To="220" Duration="0:0:1.8" BeginTime="0:0:0.4" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw2" Storyboard.TargetProperty="Height" From="0" To="220" Duration="0:0:1.8" BeginTime="0:0:0.4" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw2" Storyboard.TargetProperty="Opacity" From="0.8" To="0" Duration="0:0:1.8" BeginTime="0:0:0.4" AutoReverse="False" RepeatBehavior="Forever" />
+
+                                        <DoubleAnimation Storyboard.TargetName="Fw3" Storyboard.TargetProperty="Width" From="0" To="240" Duration="0:0:2.0" BeginTime="0:0:0.8" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw3" Storyboard.TargetProperty="Height" From="0" To="240" Duration="0:0:2.0" BeginTime="0:0:0.8" AutoReverse="False" RepeatBehavior="Forever" />
+                                        <DoubleAnimation Storyboard.TargetName="Fw3" Storyboard.TargetProperty="Opacity" From="0.8" To="0" Duration="0:0:2.0" BeginTime="0:0:0.8" AutoReverse="False" RepeatBehavior="Forever" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Canvas.Triggers>
+
+                        <!-- 底部中间三圈烟花，用渐变色模拟绽放 -->
+                        <Ellipse x:Name="Fw1" Canvas.Left="350" Canvas.Top="140">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                                    <GradientStop Color="#FFFDE68A" Offset="0" />
+                                    <GradientStop Color="#FFFACC15" Offset="0.3" />
+                                    <GradientStop Color="#00FACC15" Offset="1" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Ellipse x:Name="Fw2" Canvas.Left="580" Canvas.Top="130">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#FFBFDBFE" Offset="0" />
+                                    <GradientStop Color="#FF3B82F6" Offset="0.4" />
+                                    <GradientStop Color="#003B82F6" Offset="1" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Ellipse x:Name="Fw3" Canvas.Left="150" Canvas.Top="130">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#FFE9D5FF" Offset="0" />
+                                    <GradientStop Color="#FFA855F7" Offset="0.4" />
+                                    <GradientStop Color="#00A855F7" Offset="1" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Canvas>
+
+                    <!-- 人员卡片层，覆盖在烟花之上 -->
+                    <Border CornerRadius="26" Padding="25" Margin="0,0,0,10" Background="Transparent" Panel.ZIndex="1">
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      PanningMode="VerticalOnly">
+                            <ItemsControl ItemsSource="{Binding RollingDisplayNames}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <!-- 使用自适应 WrapPanel 居中铺满屏幕 -->
+                                        <WrapPanel HorizontalAlignment="Center"
+                                                   VerticalAlignment="Top"
+                                                   Margin="40,10,40,0" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   Margin="18,12"
+                                                   Foreground="#FACC15"
+                                                   FontWeight="Bold"
+                                                   TextOptions.TextFormattingMode="Display"
+                                                   TextOptions.TextRenderingMode="ClearType">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <!-- 默认：抽奖中滚动字号 52 -->
+                                                    <Setter Property="FontSize" Value="52" />
+                                                    <Style.Triggers>
+                                                        <!-- 抽奖停止后（IsDrawing=False）放大到 68，用于高亮中奖名单 -->
+                                                        <DataTrigger Binding="{Binding DataContext.IsDrawing, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+                                                            <Setter Property="FontSize" Value="68" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+
+                <!-- 底部操作：按钮已移除，通过快捷键控制 -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+                    <!-- Ctrl+1：开始抽奖，Ctrl+2：停止抽奖，Esc：关闭大屏 -->
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
